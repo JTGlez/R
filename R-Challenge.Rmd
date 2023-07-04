@@ -1,0 +1,111 @@
+---
+title: "Caso de estudio: Gourmet Analytics"
+output: pdf_document
+---
+
+El siguiente caso de estudio muestra el desarrollo de un trabajo de analítica para la empresa Chocolate and Tea, la cual busca saber qué países producen las barras de chocolate muy amargo (alto porcentaje de cacao) que tienen la mejor calificación, con el fin de crear un próximo menú de barras de chocolate.
+
+Para llevar a cabo este análisis, se utiliza el dataset de *Chocolate Bar Ratings* disponible en [Kaggle](https://www.kaggle.com/datasets/rtatman/chocolate-bar-ratings). Por medio de los cuadernos de R Markdown, es posible contar con una herramienta sólida para el procesamiento de datos con una alta reproducibilidad y formas de compartir los hallazgos; produciendo **visualizaciones de alta calidad**.
+
+Para proseguir, cargamos el archivo .csv recuperado y lo almacenamos en un dataframe de R.
+
+```{r}
+library(tidyverse)
+flavors_df <- read_csv("flavors_of_cacao.csv")
+```
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+
+Ahora, llevaremos a cabo un breve Análisis Exploratorio de Datos para conocer las características básicas del dataframe. Para este, usamos str(), que nos permite conocer la dimensión del dataframe (1795x9), el nombre de las columnas y su tipo de dato:
+
+```{r}
+str(flavors_df)
+```
+
+Con head() obtenemos una previsualización de las primeras 6 observaciones del dataframe:
+
+```{r}
+head(flavors_df)
+```
+
+Se observa que el nombre de la compañía tiene la leyenda adicional (*Maker-if known*). Con motivos de claridad y consistencia, renombramos el nombre de la columna por únicamente *Company*. Adicionalmente, modificamos Cocoa Percent por *Cocoa.Percent*. Para esto, empleamos un pipeline como se muestra a continuación:
+
+```{r}
+new_flavors_df <- flavors_df %>% 
+  rename(Company = `Company 
+(Maker-if known)`) %>% 
+  rename(Cocoa.Percent = `Cocoa
+Percent`) %>% 
+  rename(Company.Location = `Company
+Location`)
+```
+
+```{r}
+head(new_flavors_df)
+```
+
+Para nuestro análisis, nos enfocaremos en las variables de interés: *rating*, *Cocoa.Percent* y *Company*. Creamos un nuevo dataframe con esas tres variables únicamente:
+
+```{r}
+trimmed_flavors_df <- new_flavors_df %>%
+  select(Company, Company.Location, Rating, Cocoa.Percent)
+```
+
+```{r}
+head(trimmed_flavors_df)
+```
+
+A continuación, se obtienen estadísticos básicos usando summarize() y sd() para obtener la desviación estándar en la calificación de los datos: es decir, qué tanta dispersión tienen las observaciones de los Ratings con respecto a la media.
+
+```{r}
+trimmed_flavors_df %>%
+  summarize(RatingSD = sd(Rating))
+```
+
+A partir del caso de estudio, se determina que un Rating de 3.75 (alta calificación) y un porcentaje de Cacao superior al 80% se consideran como las condiciones objetivo del análisis. A continuación, se aplica un filter() para conocer qué observaciones cumplen con ambas condiciones:
+
+```{r}
+best_trimmed_flavors_df <- trimmed_flavors_df %>%
+  filter(Cocoa.Percent >= 80, Rating >= 3.75)
+```
+
+```{r}
+head(best_trimmed_flavors_df)
+```
+
+Con los datos limpios, iniciamos a crear visualizaciones para analizarlos usando ggplot2. A continuación, creamos un *barplot* para analizar de donde provienen mayormente los chocolates que cumplen con ambas condiciones (alta calificación y alto porcentaje de cacao).
+
+```{r}
+ggplot(data = best_trimmed_flavors_df) + 
+  geom_bar(mapping = aes(x = Company.Location)) +
+  labs(title = "Conteo de chocolates con alto rating y cacao por País")
+```
+
+El gráfico de barras muestras las ubicaciones donde se producen las barras de chocolate mejor calificadas. Para comprender mejor la calificación específica de cada ubicación, resaltamos cada barra para ubicar exactamente qué país contiene los ratings más altos.
+
+```{r}
+ggplot(data = best_trimmed_flavors_df) +
+  geom_bar(mapping = aes(x = Company.Location, alpha = Rating))
+```
+
+Nuevamente, creamos esta visualización, pero usando un faucet en su lugar para obtener gráficas individuales por cada país:
+
+```{r}
+ggplot(data = best_trimmed_flavors_df) + 
+  geom_bar(mapping = aes(x = Company.Location, alpha = Rating)) +
+  facet_wrap(~Cocoa.Percent)
+```
+
+Luego, creamos un diagrama de dispersión para observar la relación entre el porcentaje de Cocoa y el rating de cada chocolate.
+
+```{r}
+ggplot(data = best_trimmed_flavors_df) + 
+  geom_point(mapping = aes(x = Cocoa.Percent, y = Rating)) +
+  labs(title = "Suggested Chocolate")
+```
+
+Guardmos esta gráfica con:
+
+```{r}
+ggsave("chocolate.png")
+```

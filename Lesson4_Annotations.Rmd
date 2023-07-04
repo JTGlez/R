@@ -77,7 +77,7 @@ The first step will be adding a title; that is often the first thing people will
 ggplot(data = hotel_bookings) +
   geom_bar(mapping = aes(x = market_segment)) +
   facet_wrap(~hotel) +
-  labs(title="")
+  labs(title="Markets Segments in City and Resort Hotels")
 ```
 
 This code chunk will generate the same chart as before, but now it includes a title to explain the data visualization more clearly to your audience. 
