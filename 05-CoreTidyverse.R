@@ -19,6 +19,27 @@ View(ToothGrowth)
 library(dplyr)
 
 # filter() permite filtrar datos según una condición. La salida serán 
-# observaciones donde dose es exactamente igual a 0.5
+# observaciones donde la dosis de vitamina C es exactamente igual a 0.5
 filtered_tg <- filter(ToothGrowth, dose == 0.5)
 View(filtered_tg)
+
+# Se ordenan los datos filtrado en orden ascendiente
+arrange(filtered_tg, len)
+
+# Las funciones también pueden anidarse
+arrange(filter(ToothGrowth, dose == 0.5), len)
+
+# Ahora, se usa un Pipe: ctrl+shift+m
+filtered_toothgrowth <- ToothGrowth %>% 
+  filter(dose == 0.5) %>%
+  arrange(len)
+
+View(filtered_toothgrowth)
+
+# Ahora, se usa otro pipe para obtener la media entre suplementos
+filtered_toothgrowth2 <- ToothGrowth %>% 
+  filter(dose == 0.5) %>%
+  group_by(supp) %>%
+  summarise(mean_len = mean(len, na.rm = T),.group="drop")
+  
+View(filtered_toothgrowth2)
