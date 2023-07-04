@@ -46,3 +46,19 @@ ggplot(data = mtcars, aes(x = wt, y = mpg)) +
   geom_point() +
   labs(title = "Relación entre peso y consumo de combustible",
        x = "Peso", y = "Consumo de combustible")
+
+# Ahora creamos diagramas de visualización con el dataframe de Pinguinos.
+library(palmerpenguins)
+
+# El siguiente código toma el dataframe de pinguinos, añade una capa de 
+# visualización agregando una función geom_point() para añadir puntos de 
+# dispersión y, como argumento, se toma un mapeo usando aes() y definiendo
+# qué variables serán "x" y "y" en cuanto a los ejes.
+ggplot(data = penguins) + geom_point(mapping = aes(x = flipper_length_mm, y = body_mass_g))
+
+# Hoja de referencia de ggplot2: https://ggplot2.tidyverse.org/
+
+
+
+
+
